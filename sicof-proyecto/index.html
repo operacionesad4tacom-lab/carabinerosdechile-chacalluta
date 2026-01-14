@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICOF - Carabineros de Chile</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/tablet.css">
+    <link rel="stylesheet" href="css/desktop.css">
+    <link rel="icon" href="assets/logos/favicon.ico">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e6f2ec 100%);
+            padding: var(--spacing-md);
+        }
+        
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--blanco);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border-top: 6px solid var(--verde-oficial);
+        }
+        
+        .login-header {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: linear-gradient(to right, var(--verde-oscuro), var(--verde-oficial));
+            color: var(--blanco);
+        }
+        
+        .login-logo {
+            height: 80px;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .login-body {
+            padding: var(--spacing-xl);
+        }
+        
+        .login-footer {
+            text-align: center;
+            padding: var(--spacing-md);
+            background-color: var(--gris-claro);
+            color: var(--gris-medio);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--verde-claro);
+        }
+        
+        .alert {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="login-logo">
+                <h1 style="margin-bottom: var(--spacing-xs);">CARABINEROS DE CHILE</h1>
+                <p style="opacity: 0.9; font-size: 0.875rem;">Sistema Integrado de Control Fronterizo</p>
+                <p style="opacity: 0.8; font-size: 0.75rem; margin-top: var(--spacing-xs);">
+                    Especialidad Montaña y Fronteras
+                </p>
+            </div>
+            
+            <div class="login-body">
+                <!-- Mensaje de error/success -->
+                <div id="loginMessage" class="alert" style="display: none;"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            📧 Correo Institucional
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-control" 
+                            placeholder="usuario@carabineros.cl"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            🔒 Contraseña
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="Ingrese su contraseña"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <span id="loginText">🚪 INGRESAR AL SISTEMA</span>
+                        <span id="loginLoading" style="display: none;">
+                            <div class="loading-spinner" style="width: 20px; height: 20px; margin-right: 8px;"></div>
+                            Verificando...
+                        </span>
+                    </button>
+                </form>
+            </div>
+            
+            <div class="login-footer">
+                <p>© 2026 Carabineros de Chile. Todos los derechos reservados.</p>
+                <p style="font-size: 0.75rem; margin-top: 4px;">SICOF v2.0 - Plataforma Operativa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = e.target.querySelector('button[type="submit"]');
+            const loginText = document.getElementById('loginText');
+            const loginLoading = document.getElementById('loginLoading');
+            const messageEl = document.getElementById('loginMessage');
+            
+            // Mostrar loading
+            loginText.style.display = 'none';
+            loginLoading.style.display = 'flex';
+            loginBtn.disabled = true;
+            
+            // Ocultar mensaje anterior
+            messageEl.style.display = 'none';
+            
+            try {
+                // Intentar login
+                const { data, error } = await window.supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                // Obtener perfil del usuario
+                const { data: profile } = await window.supabase
+                    .from('usuarios')
+                    .select('rol, cuartel_codigo')
+                    .eq('email', email)
+                    .single();
+                
+                if (!profile) {
+                    throw new Error('Usuario no encontrado en el sistema');
+                }
+                
+                // Guardar información en localStorage
+                localStorage.setItem('sicof_user', JSON.stringify({
+                    email: data.user.email,
+                    rol: profile.rol,
+                    cuartel_codigo: profile.cuartel_codigo,
+                    session: data.session
+                }));
+                
+                // Redirigir según rol
+                const redirectUrl = window.SICOF_CONFIG.redirectUrls[profile.rol];
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    throw new Error('Rol no válido');
+                }
+                
+            } catch (error) {
+                // Mostrar error
+                messageEl.innerHTML = `
+                    <strong>Error de autenticación</strong>
+                    <p>${error.message}</p>
+                `;
+                messageEl.className = 'alert alert-danger';
+                messageEl.style.display = 'block';
+                
+                // Restaurar botón
+                loginText.style.display = 'flex';
+                loginLoading.style.display = 'none';
+                loginBtn.disabled = false;
+                
+                // Auto-ocultar mensaje después de 5 segundos
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        });
+        
+        // Auto-focus en email
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('email').focus();
+        });
+    </script>
+</body>
+</html>
