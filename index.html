@@ -68,6 +68,20 @@
                 transform: translateY(0);
             }
         }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--verde-claro);
+            border-top-color: var(--blanco);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -117,12 +131,21 @@
                     
                     <button type="submit" class="btn btn-primary" style="width: 100%;">
                         <span id="loginText">🚪 INGRESAR AL SISTEMA</span>
-                        <span id="loginLoading" style="display: none;">
-                            <div class="loading-spinner" style="width: 20px; height: 20px; margin-right: 8px;"></div>
+                        <span id="loginLoading" style="display: none; align-items: center; justify-content: center;">
+                            <div class="loading-spinner" style="margin-right: 8px;"></div>
                             Verificando...
                         </span>
                     </button>
                 </form>
+                
+                <!-- Información de usuarios de prueba (solo para desarrollo) -->
+                <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--gris-claro); border-radius: var(--border-radius-sm); font-size: 0.75rem;">
+                    <strong>👤 Usuarios de prueba:</strong><br>
+                    <em>digitador@carabineros.cl</em><br>
+                    <em>jefe@carabineros.cl</em><br>
+                    <em>jefatura@carabineros.cl</em><br>
+                    <em>admin@carabineros.cl</em>
+                </div>
             </div>
             
             <div class="login-footer">
@@ -135,9 +158,11 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
     <script>
-        // Login Form Handler
+        // ============================================
+        // MANEJADOR DE LOGIN
+        // Autenticación contra tabla usuarios
+        // ============================================
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -157,65 +182,76 @@
             messageEl.style.display = 'none';
             
             try {
-                // Intentar login
-                const { data, error } = await window.supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
-                
-                if (error) throw error;
-                
-                // Obtener perfil del usuario
-                const { data: profile } = await window.supabase
-                    .from('usuarios')
-                    .select('rol, cuartel_codigo')
-                    .eq('email', email)
-                    .single();
-                
-                if (!profile) {
-                    throw new Error('Usuario no encontrado en el sistema');
-                }
+                // Llamar a la función de login personalizada
+                const usuario = await window.loginUsuario(email, password);
                 
                 // Guardar información en localStorage
                 localStorage.setItem('sicof_user', JSON.stringify({
-                    email: data.user.email,
-                    rol: profile.rol,
-                    cuartel_codigo: profile.cuartel_codigo,
-                    session: data.session
+                    id: usuario.id,
+                    email: usuario.email,
+                    nombre: usuario.nombre,
+                    rol: usuario.rol,
+                    cuartel_codigo: usuario.cuartel_codigo
                 }));
                 
+                // Mostrar mensaje de éxito
+                messageEl.innerHTML = `
+                    <strong>✅ Bienvenido</strong>
+                    <p>Ingresando al sistema...</p>
+                `;
+                messageEl.className = 'alert alert-success';
+                messageEl.style.display = 'block';
+                
+                // Esperar un momento para mostrar el mensaje
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
                 // Redirigir según rol
-                const redirectUrl = window.SICOF_CONFIG.redirectUrls[profile.rol];
+                const redirectUrl = window.SICOF_CONFIG.redirectUrls[usuario.rol];
                 if (redirectUrl) {
                     window.location.href = redirectUrl;
                 } else {
-                    throw new Error('Rol no válido');
+                    throw new Error('Rol no válido: ' + usuario.rol);
                 }
                 
             } catch (error) {
                 // Mostrar error
+                console.error('Error en login:', error);
+                
                 messageEl.innerHTML = `
-                    <strong>Error de autenticación</strong>
+                    <strong>❌ Error de autenticación</strong>
                     <p>${error.message}</p>
+                    <p style="font-size: 0.875rem; margin-top: 8px;">
+                        Verifica tu email y contraseña. Los usuarios deben estar registrados en la tabla 'usuarios' de Supabase.
+                    </p>
                 `;
                 messageEl.className = 'alert alert-danger';
                 messageEl.style.display = 'block';
                 
                 // Restaurar botón
-                loginText.style.display = 'flex';
+                loginText.style.display = 'inline';
                 loginLoading.style.display = 'none';
                 loginBtn.disabled = false;
                 
-                // Auto-ocultar mensaje después de 5 segundos
+                // Auto-ocultar mensaje después de 8 segundos
                 setTimeout(() => {
                     messageEl.style.display = 'none';
-                }, 5000);
+                }, 8000);
             }
         });
         
-        // Auto-focus en email
+        // Auto-focus en email al cargar
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('email').focus();
+            
+            // Verificar si ya hay sesión activa
+            const user = window.verificarSesion();
+            if (user) {
+                // Ya está logueado, redirigir
+                const redirectUrl = window.SICOF_CONFIG.redirectUrls[user.rol];
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            }
         });
     </script>
 </body>
