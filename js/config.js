@@ -63,7 +63,7 @@ window.SICOF_CONFIG = {
     redirectUrls: {
         digitador: '/servicios/datos-servicio.html',
         jefe: '/cuarteles/estado-operativo.html',
-        admin: '/admin-panel.html',
+        admin: '/admin/admin-panel.html',
         jefatura: '/dashboard.html'
     },
     
@@ -79,6 +79,82 @@ window.SICOF_CONFIG = {
     }
 };
 
+// ============================================
+// FUNCIÓN DE LOGIN PERSONALIZADA
+// Autenticación contra tabla usuarios
+// ============================================
+window.loginUsuario = async function(email, password) {
+    try {
+        // Buscar usuario en la tabla usuarios
+        const { data, error } = await window.supabase
+            .from('usuarios')
+            .select('*')
+            .eq('email', email)
+            .eq('password', password)
+            .single();
+        
+        if (error) {
+            console.error('Error en consulta:', error);
+            throw new Error('Usuario o contraseña incorrectos');
+        }
+        
+        if (!data) {
+            throw new Error('Usuario o contraseña incorrectos');
+        }
+        
+        // Validar que el usuario tenga un rol válido
+        const rolesValidos = ['digitador', 'jefe', 'admin', 'jefatura'];
+        if (!rolesValidos.includes(data.rol)) {
+            throw new Error('Rol de usuario no válido');
+        }
+        
+        return data;
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        throw error;
+    }
+};
+
+// ============================================
+// FUNCIÓN DE LOGOUT
+// ============================================
+window.logoutUsuario = function() {
+    // Limpiar localStorage
+    localStorage.removeItem('sicof_user');
+    localStorage.removeItem('servicio_paso1');
+    localStorage.removeItem('servicio_paso2');
+    localStorage.removeItem('servicio_paso3');
+    
+    // Redirigir al login
+    window.location.href = '/index.html';
+};
+
+// ============================================
+// VERIFICAR SESIÓN ACTIVA
+// ============================================
+window.verificarSesion = function(rolRequerido = null) {
+    const userStr = localStorage.getItem('sicof_user');
+    
+    if (!userStr) {
+        return null;
+    }
+    
+    try {
+        const user = JSON.parse(userStr);
+        
+        // Si se requiere un rol específico, validar
+        if (rolRequerido && user.rol !== rolRequerido) {
+            return null;
+        }
+        
+        return user;
+    } catch (error) {
+        console.error('Error verificando sesión:', error);
+        return null;
+    }
+};
+
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', () => {
     console.log('SICOF v' + window.SICOF_CONFIG.version + ' inicializado');
@@ -90,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Función para verificar conexión
 async function checkSupabaseConnection() {
     try {
-        const { data, error } = await window.supabase.from('cuarteles').select('count');
+        const { data, error } = await window.supabase.from('usuarios').select('count');
         if (error) throw error;
         console.log('✅ Conexión a Supabase establecida');
     } catch (error) {
@@ -103,9 +179,16 @@ async function checkSupabaseConnection() {
 function showConnectionError() {
     const errorEl = document.createElement('div');
     errorEl.className = 'alert alert-danger';
+    errorEl.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+    `;
     errorEl.innerHTML = `
         <strong>Error de conexión</strong>
         <p>No se pudo conectar con la base de datos. Verifique su conexión a internet.</p>
     `;
-    document.body.prepend(errorEl);
+    document.body.appendChild(errorEl);
 }
