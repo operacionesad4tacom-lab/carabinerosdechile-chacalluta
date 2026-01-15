@@ -21,7 +21,7 @@
         
         .login-card {
             width: 100%;
-            max-width: 420px;
+            max-width: 450px;
             background: var(--blanco);
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-lg);
@@ -54,6 +54,37 @@
             border-top: 1px solid var(--verde-claro);
         }
         
+        .info-box {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--verde-claro);
+            border-radius: var(--border-radius-sm);
+            border-left: 4px solid var(--verde-oficial);
+        }
+        
+        .info-box h4 {
+            color: var(--verde-oscuro);
+            margin-bottom: var(--spacing-sm);
+            font-size: 0.875rem;
+        }
+        
+        .info-box p {
+            font-size: 0.8rem;
+            color: var(--gris-profesional);
+            margin: 4px 0;
+        }
+        
+        .info-box .password-hint {
+            background: var(--blanco);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            margin-top: var(--spacing-sm);
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--verde-oficial);
+            text-align: center;
+        }
+        
         .alert {
             animation: slideIn 0.3s ease;
         }
@@ -81,6 +112,23 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .user-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: var(--spacing-sm);
+        }
+        
+        .user-item {
+            padding: var(--spacing-xs);
+            font-size: 0.75rem;
+            color: var(--gris-medio);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -112,7 +160,14 @@
                             placeholder="usuario@carabineros.cl"
                             required
                             autocomplete="username"
+                            list="emailSuggestions"
                         >
+                        <datalist id="emailSuggestions">
+                            <option value="digitador.chacalluta@carabineros.cl">
+                            <option value="jefe.chacalluta@carabineros.cl">
+                            <option value="jefatura@carabineros.cl">
+                            <option value="admin@carabineros.cl">
+                        </datalist>
                     </div>
                     
                     <div class="form-group">
@@ -123,7 +178,7 @@
                             type="password" 
                             id="password" 
                             class="form-control" 
-                            placeholder="Ingrese su contraseña"
+                            placeholder="Contraseña genérica del sistema"
                             required
                             autocomplete="current-password"
                         >
@@ -138,19 +193,46 @@
                     </button>
                 </form>
                 
-                <!-- Información de usuarios de prueba (solo para desarrollo) -->
-                <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--gris-claro); border-radius: var(--border-radius-sm); font-size: 0.75rem;">
-                    <strong>👤 Usuarios de prueba:</strong><br>
-                    <em>digitador@carabineros.cl</em><br>
-                    <em>jefe@carabineros.cl</em><br>
-                    <em>jefatura@carabineros.cl</em><br>
-                    <em>admin@carabineros.cl</em>
+                <!-- Información de acceso -->
+                <div class="info-box">
+                    <h4>🔑 Información de Acceso</h4>
+                    <p><strong>Contraseña para todos los usuarios:</strong></p>
+                    <div class="password-hint">Montañaofrontera2026</div>
+                    
+                    <details style="margin-top: var(--spacing-md);">
+                        <summary style="cursor: pointer; font-weight: 600; color: var(--verde-oscuro); font-size: 0.875rem;">
+                            Ver usuarios disponibles ▼
+                        </summary>
+                        <div class="user-list" style="margin-top: var(--spacing-sm);">
+                            <div class="user-item"><strong>Digitadores:</strong></div>
+                            <div class="user-item">• digitador.chacalluta@carabineros.cl</div>
+                            <div class="user-item">• digitador.visviri@carabineros.cl</div>
+                            <div class="user-item">• digitador.chungara@carabineros.cl</div>
+                            <div class="user-item">• digitador.alcerreca@carabineros.cl</div>
+                            <div class="user-item">• digitador.tacora@carabineros.cl</div>
+                            
+                            <div class="user-item" style="margin-top: var(--spacing-sm);"><strong>Jefes de Destacamento:</strong></div>
+                            <div class="user-item">• jefe.chacalluta@carabineros.cl</div>
+                            <div class="user-item">• jefe.visviri@carabineros.cl</div>
+                            <div class="user-item">• jefe.chungara@carabineros.cl</div>
+                            <div class="user-item">• jefe.alcerreca@carabineros.cl</div>
+                            <div class="user-item">• jefe.tacora@carabineros.cl</div>
+                            
+                            <div class="user-item" style="margin-top: var(--spacing-sm);"><strong>Jefatura:</strong></div>
+                            <div class="user-item">• jefatura@carabineros.cl</div>
+                            <div class="user-item">• jefatura.montana@carabineros.cl</div>
+                            
+                            <div class="user-item" style="margin-top: var(--spacing-sm);"><strong>Administradores:</strong></div>
+                            <div class="user-item">• admin@carabineros.cl</div>
+                            <div class="user-item">• admin.sistema@carabineros.cl</div>
+                        </div>
+                    </details>
                 </div>
             </div>
             
             <div class="login-footer">
                 <p>© 2026 Carabineros de Chile. Todos los derechos reservados.</p>
-                <p style="font-size: 0.75rem; margin-top: 4px;">SICOF v2.0 - Plataforma Operativa</p>
+                <p style="font-size: 0.75rem; margin-top: 4px;">SICOF v2.0 - Autenticación Local</p>
             </div>
         </div>
     </div>
@@ -161,12 +243,12 @@
     <script>
         // ============================================
         // MANEJADOR DE LOGIN
-        // Autenticación contra tabla usuarios
+        // Autenticación local sin base de datos
         // ============================================
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const loginBtn = e.target.querySelector('button[type="submit"]');
             const loginText = document.getElementById('loginText');
@@ -181,62 +263,63 @@
             // Ocultar mensaje anterior
             messageEl.style.display = 'none';
             
-            try {
-                // Llamar a la función de login personalizada
-                const usuario = await window.loginUsuario(email, password);
-                
-                // Guardar información en localStorage
-                localStorage.setItem('sicof_user', JSON.stringify({
-                    id: usuario.id,
-                    email: usuario.email,
-                    nombre: usuario.nombre,
-                    rol: usuario.rol,
-                    cuartel_codigo: usuario.cuartel_codigo
-                }));
-                
-                // Mostrar mensaje de éxito
-                messageEl.innerHTML = `
-                    <strong>✅ Bienvenido</strong>
-                    <p>Ingresando al sistema...</p>
-                `;
-                messageEl.className = 'alert alert-success';
-                messageEl.style.display = 'block';
-                
-                // Esperar un momento para mostrar el mensaje
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Redirigir según rol
-                const redirectUrl = window.SICOF_CONFIG.redirectUrls[usuario.rol];
-                if (redirectUrl) {
-                    window.location.href = redirectUrl;
-                } else {
-                    throw new Error('Rol no válido: ' + usuario.rol);
+            // Simular delay de red (para mejor UX)
+            setTimeout(() => {
+                try {
+                    // Llamar a la función de login local
+                    const usuario = window.loginUsuario(email, password);
+                    
+                    // Guardar información en localStorage
+                    localStorage.setItem('sicof_user', JSON.stringify(usuario));
+                    
+                    // Mostrar mensaje de éxito
+                    messageEl.innerHTML = `
+                        <strong>✅ Bienvenido ${usuario.nombre}</strong>
+                        <p>Ingresando al sistema...</p>
+                    `;
+                    messageEl.className = 'alert alert-success';
+                    messageEl.style.display = 'block';
+                    
+                    // Redirigir según rol
+                    setTimeout(() => {
+                        const redirectUrl = window.SICOF_CONFIG.redirectUrls[usuario.rol];
+                        if (redirectUrl) {
+                            window.location.href = redirectUrl;
+                        } else {
+                            throw new Error('Rol no válido');
+                        }
+                    }, 800);
+                    
+                } catch (error) {
+                    // Mostrar error
+                    let errorMessage = error.message;
+                    let helpText = '';
+                    
+                    if (error.message.includes('Contraseña')) {
+                        helpText = 'La contraseña correcta es: <strong>Montañaofrontera2026</strong>';
+                    } else if (error.message.includes('no registrado')) {
+                        helpText = 'Verifica que el correo esté en la lista de usuarios disponibles.';
+                    }
+                    
+                    messageEl.innerHTML = `
+                        <strong>❌ Error de autenticación</strong>
+                        <p>${errorMessage}</p>
+                        ${helpText ? `<p style="font-size: 0.875rem; margin-top: 8px;">${helpText}</p>` : ''}
+                    `;
+                    messageEl.className = 'alert alert-danger';
+                    messageEl.style.display = 'block';
+                    
+                    // Restaurar botón
+                    loginText.style.display = 'inline';
+                    loginLoading.style.display = 'none';
+                    loginBtn.disabled = false;
+                    
+                    // Auto-ocultar mensaje después de 8 segundos
+                    setTimeout(() => {
+                        messageEl.style.display = 'none';
+                    }, 8000);
                 }
-                
-            } catch (error) {
-                // Mostrar error
-                console.error('Error en login:', error);
-                
-                messageEl.innerHTML = `
-                    <strong>❌ Error de autenticación</strong>
-                    <p>${error.message}</p>
-                    <p style="font-size: 0.875rem; margin-top: 8px;">
-                        Verifica tu email y contraseña. Los usuarios deben estar registrados en la tabla 'usuarios' de Supabase.
-                    </p>
-                `;
-                messageEl.className = 'alert alert-danger';
-                messageEl.style.display = 'block';
-                
-                // Restaurar botón
-                loginText.style.display = 'inline';
-                loginLoading.style.display = 'none';
-                loginBtn.disabled = false;
-                
-                // Auto-ocultar mensaje después de 8 segundos
-                setTimeout(() => {
-                    messageEl.style.display = 'none';
-                }, 8000);
-            }
+            }, 500);
         });
         
         // Auto-focus en email al cargar
@@ -251,6 +334,16 @@
                 if (redirectUrl) {
                     window.location.href = redirectUrl;
                 }
+            }
+        });
+        
+        // Autocompletar email al seleccionar de la lista
+        document.getElementById('email').addEventListener('input', function() {
+            // Si el email está completo, hacer focus en password
+            if (this.value.includes('@carabineros.cl')) {
+                setTimeout(() => {
+                    document.getElementById('password').focus();
+                }, 100);
             }
         });
     </script>
