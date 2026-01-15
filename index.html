@@ -413,24 +413,36 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // ============================================
-        // CONFIGURACIÓN SUPABASE
+        // CONFIGURACIÓN SUPABASE - SOLUCIÓN CORREGIDA
         // ============================================
-        const SUPABASE_URL = "https://pmvzwppxoyspnhnpbyzg.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtdnp3cHB4b3lzcG5obnBieXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MTM0NDIsImV4cCI6MjA4Mzk4OTQ0Mn0.81nbc_HtRTQygDTjec7QFkalfGpB_lk2J7-EotC0a-Q";
+        // El problema: estás incluyendo config.js que ya declara supabase
+        // Solución: Usar solo este archivo o verificar si ya existe
         
-        // Inicializar Supabase
-        const supabase = window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Verificar si supabase ya está definido
+        if (typeof window.supabase === 'undefined') {
+            // Configuración solo si no existe
+            const SUPABASE_URL = "https://pmvzwppxoyspnhnpbyzg.supabase.co";
+            const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtdnp3cHB4b3lzcG5obnBieXpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MTM0NDIsImV4cCI6MjA4Mzk4OTQ0Mn0.81nbc_HtRTQygDTjec7QFkalfGpB_lk2J7-EotC0a-Q";
+            
+            // Inicializar Supabase
+            window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        
+        // Usar la instancia existente
+        const supabaseClient = window.supabase;
         
         // Configuración de la aplicación
-        window.SICOF_CONFIG = {
-            version: '2.0.0',
-            redirectUrls: {
-                digitador: '/servicios/datos-servicio.html',
-                jefe: '/cuarteles/estado-operativo.html',
-                admin: '/admin/admin-panel.html',
-                jefatura: '/dashboard.html'
-            }
-        };
+        if (typeof window.SICOF_CONFIG === 'undefined') {
+            window.SICOF_CONFIG = {
+                version: '2.0.0',
+                redirectUrls: {
+                    digitador: '/servicios/datos-servicio.html',
+                    jefe: '/cuarteles/estado-operativo.html',
+                    admin: '/admin/admin-panel.html',
+                    jefatura: '/dashboard.html'
+                }
+            };
+        }
         
         // ============================================
         // FUNCIÓN DE LOGIN MEJORADA
@@ -443,7 +455,7 @@
                 const isEmail = loginInput.includes('@');
                 
                 // 2. Construir consulta
-                let query = supabase
+                let query = supabaseClient
                     .from('usuarios')
                     .select('*')
                     .eq('is_active', true);
@@ -503,7 +515,7 @@
                     
                     // 5. Actualizar last_login
                     try {
-                        await supabase
+                        await supabaseClient
                             .from('usuarios')
                             .update({ 
                                 last_login: new Date().toISOString(),
@@ -706,7 +718,13 @@
                 if (userStr) {
                     const user = JSON.parse(userStr);
                     console.log('Usuario ya logueado:', user.full_name);
-                    // Podríamos redirigir automáticamente aquí si quieres
+                    // Redirigir automáticamente si ya está logueado
+                    const redirectUrl = window.SICOF_CONFIG.redirectUrls[user.rol];
+                    if (redirectUrl) {
+                        setTimeout(() => {
+                            window.location.href = redirectUrl;
+                        }, 500);
+                    }
                 }
             } catch (e) {
                 // Limpiar localStorage corrupto
@@ -719,7 +737,7 @@
             // Verificar conexión con Supabase
             setTimeout(async () => {
                 try {
-                    const { data, error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('usuarios')
                         .select('count', { count: 'exact', head: true });
                     
