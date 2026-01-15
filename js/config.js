@@ -192,3 +192,4 @@ function showConnectionError() {
     `;
     document.body.appendChild(errorEl);
 }
+
