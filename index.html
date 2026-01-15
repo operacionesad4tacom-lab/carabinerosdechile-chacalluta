@@ -4,58 +4,255 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SICOF - Carabineros de Chile</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="stylesheet" href="css/tablet.css">
+    <link rel="stylesheet" href="css/desktop.css">
+    <link rel="icon" href="assets/logos/favicon.ico">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 40px;
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(135deg, #f8f9fa 0%, #e6f2ec 100%);
+            padding: var(--spacing-md);
+        }
+        
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--blanco);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border-top: 6px solid var(--verde-oficial);
+        }
+        
+        .login-header {
             text-align: center;
+            padding: var(--spacing-xl);
+            background: linear-gradient(to right, var(--verde-oscuro), var(--verde-oficial));
+            color: var(--blanco);
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-top: 5px solid #006837;
+        
+        .login-logo {
+            height: 80px;
+            margin-bottom: var(--spacing-md);
         }
-        h1 {
-            color: #006837;
+        
+        .login-body {
+            padding: var(--spacing-xl);
         }
-        .loading {
-            margin: 30px 0;
-            color: #666;
+        
+        .login-footer {
+            text-align: center;
+            padding: var(--spacing-md);
+            background-color: var(--gris-claro);
+            color: var(--gris-medio);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--verde-claro);
+        }
+        
+        .alert {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--verde-claro);
+            border-top-color: var(--blanco);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚨 SICOF - Sistema Integrado de Control Fronterizo</h1>
-        <p><strong>Carabineros de Chile - Especialidad Montaña y Fronteras</strong></p>
-        
-        <div class="loading">
-            <p>⏳ Inicializando sistema...</p>
-            <p>🔧 Configuración en progreso</p>
-        </div>
-        
-        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-            <h3>⚠️ Sistema en Configuración</h3>
-            <p>El sistema SICOF está siendo configurado. Pronto estará disponible.</p>
-            <p>Para desarrollo local, abre la consola (F12) para verificar.</p>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="assets/logos/escudo-carabineros.png" alt="Carabineros de Chile" class="login-logo">
+                <h1 style="margin-bottom: var(--spacing-xs);">CARABINEROS DE CHILE</h1>
+                <p style="opacity: 0.9; font-size: 0.875rem;">Sistema Integrado de Control Fronterizo</p>
+                <p style="opacity: 0.8; font-size: 0.75rem; margin-top: var(--spacing-xs);">
+                    Especialidad Montaña y Fronteras
+                </p>
+            </div>
+            
+            <div class="login-body">
+                <!-- Mensaje de error/success -->
+                <div id="loginMessage" class="alert" style="display: none;"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            📧 Correo Institucional
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-control" 
+                            placeholder="usuario@carabineros.cl"
+                            required
+                            autocomplete="username"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            🔒 Contraseña
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-control" 
+                            placeholder="Ingrese su contraseña"
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <span id="loginText">🚪 INGRESAR AL SISTEMA</span>
+                        <span id="loginLoading" style="display: none; align-items: center; justify-content: center;">
+                            <div class="loading-spinner" style="margin-right: 8px;"></div>
+                            Verificando...
+                        </span>
+                    </button>
+                </form>
+                
+                <!-- Información de usuarios de prueba (solo para desarrollo) -->
+                <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: var(--gris-claro); border-radius: var(--border-radius-sm); font-size: 0.75rem;">
+                    <strong>👤 Usuarios de prueba:</strong><br>
+                    <em>digitador@carabineros.cl</em><br>
+                    <em>jefe@carabineros.cl</em><br>
+                    <em>jefatura@carabineros.cl</em><br>
+                    <em>admin@carabineros.cl</em>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                <p>© 2026 Carabineros de Chile. Todos los derechos reservados.</p>
+                <p style="font-size: 0.75rem; margin-top: 4px;">SICOF v2.0 - Plataforma Operativa</p>
+            </div>
         </div>
     </div>
-    
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
     <script>
-        console.log('🚀 SICOF v2.0.0 - Sistema de Control Fronterizo');
-        console.log('📧 Contacto: soporte@carabineros.cl');
+        // ============================================
+        // MANEJADOR DE LOGIN
+        // Autenticación contra tabla usuarios
+        // ============================================
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = e.target.querySelector('button[type="submit"]');
+            const loginText = document.getElementById('loginText');
+            const loginLoading = document.getElementById('loginLoading');
+            const messageEl = document.getElementById('loginMessage');
+            
+            // Mostrar loading
+            loginText.style.display = 'none';
+            loginLoading.style.display = 'flex';
+            loginBtn.disabled = true;
+            
+            // Ocultar mensaje anterior
+            messageEl.style.display = 'none';
+            
+            try {
+                // Llamar a la función de login personalizada
+                const usuario = await window.loginUsuario(email, password);
+                
+                // Guardar información en localStorage
+                localStorage.setItem('sicof_user', JSON.stringify({
+                    id: usuario.id,
+                    email: usuario.email,
+                    nombre: usuario.nombre,
+                    rol: usuario.rol,
+                    cuartel_codigo: usuario.cuartel_codigo
+                }));
+                
+                // Mostrar mensaje de éxito
+                messageEl.innerHTML = `
+                    <strong>✅ Bienvenido</strong>
+                    <p>Ingresando al sistema...</p>
+                `;
+                messageEl.className = 'alert alert-success';
+                messageEl.style.display = 'block';
+                
+                // Esperar un momento para mostrar el mensaje
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Redirigir según rol
+                const redirectUrl = window.SICOF_CONFIG.redirectUrls[usuario.rol];
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    throw new Error('Rol no válido: ' + usuario.rol);
+                }
+                
+            } catch (error) {
+                // Mostrar error
+                console.error('Error en login:', error);
+                
+                messageEl.innerHTML = `
+                    <strong>❌ Error de autenticación</strong>
+                    <p>${error.message}</p>
+                    <p style="font-size: 0.875rem; margin-top: 8px;">
+                        Verifica tu email y contraseña. Los usuarios deben estar registrados en la tabla 'usuarios' de Supabase.
+                    </p>
+                `;
+                messageEl.className = 'alert alert-danger';
+                messageEl.style.display = 'block';
+                
+                // Restaurar botón
+                loginText.style.display = 'inline';
+                loginLoading.style.display = 'none';
+                loginBtn.disabled = false;
+                
+                // Auto-ocultar mensaje después de 8 segundos
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 8000);
+            }
+        });
         
-        // Verificar si estamos en GitHub Pages
-        if (window.location.hostname.includes('github.io')) {
-            console.log('🌍 Ejecutando en GitHub Pages');
-            document.querySelector('h1').innerHTML += ' <small>(GitHub Pages)</small>';
-        }
+        // Auto-focus en email al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('email').focus();
+            
+            // Verificar si ya hay sesión activa
+            const user = window.verificarSesion();
+            if (user) {
+                // Ya está logueado, redirigir
+                const redirectUrl = window.SICOF_CONFIG.redirectUrls[user.rol];
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            }
+        });
     </script>
 </body>
 </html>
